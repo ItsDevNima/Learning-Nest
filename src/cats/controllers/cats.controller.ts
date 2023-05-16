@@ -1,27 +1,34 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { CreateCatDto } from '../DTOs/cats.dto';
+import { CatsService } from '../cats.service';
+import { ICat } from '../cats.interface';
 
 @Controller('cats')
 export class CatController {
-  #catsArray: string[] = [];
-  @Get('/')
-  getCats(): string {
-    return 'Salam';
-  }
+  constructor(private catsService: CatsService) {}
 
+  // #catsArray: string[] = [];
+  
+  @Get('/')
+  async getCats(): Promise<ICat[]> {
+    return this.catsService.getAll();
+  }
+  
   @Get(':id')
-  getCatsById(@Param('id') id: string): string {
-    const Cat = this.#catsArray[+id];
-    console.log(Cat);
-    return Cat;
+  async getCatsById(@Param('id') id: string): Promise<ICat> {
+    const receivedPishi = this.catsService.getById(id);
+    console.log(receivedPishi);
+    return receivedPishi;
   }
 
   @Post('/new')
   addCat(@Body() body: CreateCatDto): void {
-    // let catsArray: string[];
-    const { name } = body;
-    this.#catsArray.push(name);
-    console.log(this.#catsArray);
+    const ID = new Date();
+    const data = {...body};
+    data['ID'] = ID;
+
+    this.catsService.create(data);
+    console.log(this.catsService.cats);
   }
 
   // @Get('/v2')
